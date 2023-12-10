@@ -30,6 +30,15 @@ While developing Substake, we encountered several notable challenges:
 
 - **Exchange Rate Calculation**: Calculating the exchange rate between Subtoken and wstETH was complex, requiring continuous logging of wstETH price on L2, which was not fully supported by messaging protocols.
 
+## Contract Addresses
+- L2 config proxy - [0x7BCaa65E6cAceF4FB7F2852488829bd92090667a](https://sepolia.scrollscan.com/address/0x7BCaa65E6cAceF4FB7F2852488829bd92090667a) 
+- SubstakeVaultProxy - [0xC4374cC35CbB2a42B9C19495AD811C742dc9FAA9](https://sepolia.scrollscan.com/address/0xC4374cC35CbB2a42B9C19495AD811C742dc9FAA9) 
+- SubstakeRouterProxy - [0x4ceBC071291125dffc07Fb2b57d2B96c9FB32bCD](https://sepolia.scrollscan.com/address/0x4ceBC071291125dffc07Fb2b57d2B96c9FB32bCD) 
+- SubstakeLib - [0x7a5483542b602e130a05Db23a7E2AeC59b2F08C6](https://sepolia.scrollscan.com/address/0x7a5483542b602e130a05Db23a7E2AeC59b2F08C6) 
+- Lib Address - [0x6EAFfb5d25e5e6a41C77e694cccB0603225BE7aD](https://sepolia.etherscan.io/address/0x6EAFfb5d25e5e6a41C77e694cccB0603225BE7aD)
+- ConfigProxy - [0x24B6C8B950D964eEaF9A247a0e8539778757e449](https://sepolia.etherscan.io/address/0x24B6C8B950D964eEaF9A247a0e8539778757e449)
+- ManagerProxy - [0x4ceBC071291125dffc07Fb2b57d2B96c9FB32bCD](https://sepolia.etherscan.io/address/0x4ceBC071291125dffc07Fb2b57d2B96c9FB32bCD)
+
 ## Contact Us
 
 For inquiries and support, please contact us at [![x.com/surfer__05]](https://twitter.com/surfer__05)
