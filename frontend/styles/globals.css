@@ -95,3 +95,53 @@ input::-webkit-inner-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
+.box_shadow_div {
+  box-shadow:
+    0px 29px 176px 42px rgb(247, 230, 230),
+    25px 0px 20px -20px rgba(0, 0, 0, 0.45),
+    0px 25px 20px -20px rgba(0, 0, 0, 0.45),
+    -25px 0px 20px -20px rgba(0, 0, 0, 0.45);
+}
+
+.shimmer {
+  animation-duration: 2.2s;
+  animation-fill-mode: forwards;
+  animation-iteration-count: infinite;
+  animation-name: shimmer;
+  animation-timing-function: linear;
+  background: #ffdead;
+  background: linear-gradient(to right, #ffdead 8%, #c1b869 18%, #ffdead 33%);
+  background-size: 1200px 100%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1200px 0;
+  }
+  100% {
+    background-position: 1200px 0;
+  }
+}
+
+.path {
+  stroke-dasharray: 20;
+  animation: dash 8s linear infinite;
+}
+
+.path2 {
+  stroke-dasharray: 20;
+  animation: reverse dash2 8s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 1000;
+  }
+}
+
+@keyframes dash2 {
+  to {
+    stroke-dashoffset: 1000;
+  }
+}
