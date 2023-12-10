@@ -1,4 +1,5 @@
 # Substake: Cross-chain Liquid Staking Solution
+![alt text](http://url/to/img.png)
 
 Substake is a groundbreaking Cross-chain Liquid Staking solution designed to enable seamless participation in liquid staking from Layer 2 (L2) funds. By leveraging Substake, users can deposit their wrapped tokens on L2, which our platform bridges to Layer 1 (L1) for staking on Liquid Staking Derivative (LSD) platforms such as Lido, Rocket Pool, and Stader Labs. Our solution is highly gas-effective, minimizing the bridging and staking costs for users.
 
