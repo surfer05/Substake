@@ -32,6 +32,6 @@ While developing Substake, we encountered several notable challenges:
 
 ## Contact Us
 
-For inquiries and support, please contact us at [info@substake.com](mailto:info@substake.com).
+For inquiries and support, please contact us at [x.com/surfer__05](x.com/surfer__05).
 
 Thank you for choosing Substake for your liquid staking needs.
