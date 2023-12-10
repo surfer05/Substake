@@ -78,7 +78,7 @@ export function DataTable<TData, TValue>({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className="rounded-md">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -99,7 +99,7 @@ export function DataTable<TData, TValue>({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell, i) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="rounded-b-md">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -112,7 +112,7 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  className="h-24 text-center rounded-b-md"
                 >
                   No results.
                 </TableCell>
