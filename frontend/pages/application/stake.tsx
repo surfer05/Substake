@@ -1,10 +1,11 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getNetwork } from "@wagmi/core";
 import { ConnectKitButton } from "connectkit";
-import { JsonRpcProvider, N, ethers } from "ethers";
+import { ethers } from "ethers";
 import { Dot } from "lucide-react";
 import { NextPage } from "next";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAccount, useBalance } from "wagmi";
 import web3modal from "web3modal";
@@ -18,24 +19,27 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { config, getAbi } from "@/configData";
+import { config } from "@/configData";
+import { AddUserStakesType } from "@/interfaces/UserStakes";
 import ApplicationLayout from "@/layouts/ApplicationLayout";
 import { cn } from "@/lib/utils";
 
 const StakePage: NextPage = () => {
   const [stakeValue, setStakeValue] = useState("");
-  const [ethPerSubToken, setEthPerSubToken] = useState("");
+  const [subTokenPerETH, setSubTokenPerETH] = useState("");
   const [receiveSUB, setReceiveSub] = useState(0);
   const [stakeLoading, setStakeLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
-  const { address, isConnecting, isDisconnected } = useAccount();
+  const queryClient = useQueryClient();
 
-  const { data, isError, isLoading } = useBalance({
+  const { address } = useAccount();
+
+  const { data } = useBalance({
     address: address,
   });
-  const { connector: activeConnector, isConnected } = useAccount();
-  const { chain, chains } = getNetwork();
+  const { isConnected } = useAccount();
+  const { chain } = getNetwork();
   const accountBalance = data?.formatted;
   const _chain = chain?.name;
 
@@ -49,17 +53,18 @@ const StakePage: NextPage = () => {
   }, []);
 
   useEffect(() => {
-    getEthPerSub();
+    getSubPerETH();
     caculateSubTokenAmount();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stakeValue]);
 
-  const caculateSubTokenAmount = () => {
-    let subTokenAmont = Number(stakeValue) * Number(ethPerSubToken);
+  const caculateSubTokenAmount = useCallback(() => {
+    let subTokenAmont = Number(stakeValue) * Number(subTokenPerETH);
     setReceiveSub(subTokenAmont);
-  };
+  }, [stakeValue, subTokenPerETH]);
 
-  const getEthPerSub = async () => {
-    const jsonProvider = new JsonRpcProvider(
+  const getSubPerETH = useCallback(async () => {
+    const jsonProvider = new ethers.providers.JsonRpcProvider(
       process.env.NEXT_PUBLIC_SCROLL_RPC!
     );
     const contract = new ethers.Contract(
@@ -68,14 +73,35 @@ const StakePage: NextPage = () => {
       jsonProvider
     );
     try {
-      await contract.ethPerSubToken().then((response) => {
-        let ethPerSub = (Number(response) / 10 ** 18).toFixed(4);
-        setEthPerSubToken(ethPerSub);
+      await contract.subTokenPerEth().then((response:any) => {
+        let ethPerSub = ethers.utils.parseUnits(response.toString());
+        let converted = (Number(ethPerSub) / 10 ** 18).toFixed(3);
+        setSubTokenPerETH(converted);
       });
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [vaultProxyAddress]);
+
+  const { mutate, isPending, isError } = useMutation({
+    mutationFn: async (data: AddUserStakesType) => {
+      const res = await fetch("http://localhost:3000/api/addUserStakes", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (res?.status !== 200)
+        return toast.error("Someting went wrong!", { id: "stake" });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["stakeData"] });
+    },
+    onError: (error) => {
+      console.log(error);
+    },
+  });
 
   const stakeHandler = async () => {
     if (!stakeValue) return toast.error("Please enter an amount!");
@@ -89,9 +115,9 @@ const StakePage: NextPage = () => {
       cacheProvider: true,
     });
     const connection = await modal.connect();
-    const provider = new ethers.BrowserProvider(connection);
-    const signer = await provider.getSigner();
-    const stakeAmount = ethers.parseEther(stakeValue);
+    const provider = new ethers.providers.Web3Provider(connection);
+    const signer = provider.getSigner();
+    const stakeAmount = ethers.utils.parseEther(stakeValue);
 
     const contract = new ethers.Contract(
       vaultProxyAddress,
@@ -101,14 +127,11 @@ const StakePage: NextPage = () => {
 
     let stakeBatchId;
     try {
-      stakeBatchId = contract
-        .activeStakeBatch()
-        .then((res) => console.log(Number(res)));
+      stakeBatchId = (await contract.activeStakeBatch()).toString();
+      if (!stakeBatchId) return toast.error("Deposit failed");
     } catch (error) {
       console.log(error);
     }
-
-    if (!stakeBatchId) return toast.error("Deposit failed");
 
     try {
       let tx = await contract.deposit(stakeAmount, address, {
@@ -116,12 +139,28 @@ const StakePage: NextPage = () => {
         gasLimit: 1100000,
       });
 
-      toast.success("Successfully Staked!", { id: "stake" });
+      let txRes = await tx.wait();
+
+      if (txRes.status === 0)
+        return toast.error("Failed to stake!", { id: "stake" });
+
+      mutate({
+        address: address!,
+        assets: stakeValue,
+        stakeBatchId: Number(stakeBatchId),
+        protocol: "Lido",
+        network: _chain!,
+      });
+
+      if (isPending) return toast.loading("Staking...", { id: "stake" });
+      if (isError) return toast.error("Failed to stake!", { id: "stake" });
+
       setStakeValue("");
+      toast.success("Successfully Staked!", { id: "stake" });
       setStakeLoading(false);
     } catch (error) {
-      toast.error("Failed to stake!", { id: "stake" });
       setStakeValue("");
+      toast.error("Failed to stake!", { id: "stake" });
       setStakeLoading(false);
     }
   };
@@ -130,18 +169,16 @@ const StakePage: NextPage = () => {
 
   return (
     <ApplicationLayout>
-      <div className="h-[calc(100vh-82px)] flex flex-col w-full max-w-xl mx-auto justify-center items-center px-3 sm:px-0 overflow-hidden">
+      <div className="h-[calc(100vh-82px)] flex flex-col mx-auto justify-center items-center px-3 sm:px-0 overflow-hidden">
         <div className="fixed -right-72 top-[80px] opacity-60">
           <div className="relative w-[695px] h-[1024px]">
             <Image src="/widget.svg" fill alt="eth" />
           </div>
         </div>
 
-        <div className="rounded-xl border-2 border-mainBg w-full p-3 bg-[#fadfb5] shadow-2xl z-30">
+        <div className="shadow-xl rounded-xl border-2 border-mainBg w-full max-w-xl p-3 bg-[#fadfb5] z-40">
           <div className="rounded-tl-xl rounded-tr-xl transition-all shadow-sm relative border border-mainBg p-4 w-full flex items-center gap-4">
-            <div className="p-2 bg-mainBg rounded-xl">
-              <Image src="/logo_white.svg" width={25} height={25} alt="eth" />
-            </div>
+            <Image src="/eth.svg" width={40} height={40} alt="eth" />
 
             <div className="flex flex-col">
               <p className="text-xs text-gray-500">AVAILABLE TO STAKE</p>
@@ -158,11 +195,7 @@ const StakePage: NextPage = () => {
                       })}
                     />
                   </TooltipTrigger>
-                  <TooltipContent
-                    className={cn("bg-[#fadfb5] border-mainBg text-green-500", {
-                      "text-red-500": !isConnected,
-                    })}
-                  >
+                  <TooltipContent className="bg-[#fadfb5] border-mainBg text-gray-500">
                     {isConnected ? _chain : "Disconnected"}
                   </TooltipContent>
                 </Tooltip>
@@ -173,11 +206,7 @@ const StakePage: NextPage = () => {
                   "text-green-500": isConnected,
                 })}
               />
-              <span
-                className={cn("text-green-500 hidden sm:flex", {
-                  "text-red-500": !isConnected,
-                })}
-              >
+              <span className="hidden sm:flex text-gray-500">
                 {isConnected ? _chain : "Disconnected"}
               </span>
             </div>
@@ -214,7 +243,7 @@ const StakePage: NextPage = () => {
 
             <div className="flex items-center justify-between">
               <p className="text-gray-500 uppercase">Exchange Rate</p>
-              <p>1 SUB = {ethPerSubToken} ETH </p>
+              <p>1 SUB = {subTokenPerETH} ETH </p>
             </div>
 
             <div className="flex items-center justify-between">
