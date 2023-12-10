@@ -32,7 +32,7 @@ While developing Substake, we encountered several notable challenges:
 
 ## Contact Us
 
-For inquiries and support, please contact us at [![Twitter URL]](https://twitter.com/surfer__05)
+For inquiries and support, please contact us at [![x.com/surfer__05]](https://twitter.com/surfer__05)
 .
 
 Thank you for choosing Substake for your liquid staking needs.
