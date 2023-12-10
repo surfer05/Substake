@@ -40,6 +40,9 @@ While developing Substake, we encountered several notable challenges:
 - ConfigProxy - [0x24B6C8B950D964eEaF9A247a0e8539778757e449](https://sepolia.etherscan.io/address/0x24B6C8B950D964eEaF9A247a0e8539778757e449)
 - ManagerProxy - [0x4ceBC071291125dffc07Fb2b57d2B96c9FB32bCD](https://sepolia.etherscan.io/address/0x4ceBC071291125dffc07Fb2b57d2B96c9FB32bCD)
 
+## Demo
+👉🏼 [Demo video](https://www.youtube.com/watch?v=X3GtBPF1ffM)
+
 ## Contact Us
 
 For inquiries and support, please contact us at [![x.com/surfer__05]](https://twitter.com/surfer__05)
